@@ -1,10 +1,30 @@
-// COMMANDS
+const readline = require('readline');
 
-// CREATE >depth
-// LIST :depth list
-// MOVE
-// DELETE
+let cmd_buffer = '';
 
+readline.emitKeypressEvents(process.stdin);
+process.stdin.setRawMode(true);
+process.stdin.on('keypress', (str, key) => {
+  if (key.ctrl && key.name === 'c') {
+    process.exit();
+  } 
+  else {
+    if(key.name === "return"){
+      console.log("\n");
+      interpretCommand(cmd_buffer);
+      cmd_buffer = '';
+    }
+    else{
+      cmd_buffer += str;
+      process.stdout.write(str);
+    }
+  }
+});
+
+
+
+/*
+*/
 let directories = {};
 
 const interpretCommand = (cmd)=>{
@@ -23,6 +43,8 @@ const interpretCommand = (cmd)=>{
     case 'delete':
       deleteDirectory(arg0);
       break;
+    case 'exit':
+      process.exit(0);
     default:
       throw new Error(`Unknown command: \`${command}\``);
   }
@@ -88,7 +110,7 @@ const moveDirectory = (src, dest) =>{
       }
       dest_mark = dest_mark[item];
     }
-    Object.assign(dest_mark, temp);
+    dest_mark[last_key] = temp;
   }
   delete last_context[last_key];
 }
@@ -110,16 +132,3 @@ const deleteDirectory = (path) => {
   }
   delete temp[target];
 }
-
-interpretCommand("CREATE feline/housecat");
-interpretCommand("CREATE feline/tiger");
-interpretCommand("CREATE feline/canine");
-
-interpretCommand("CREATE feline/canine/dog");
-interpretCommand("CREATE feline/canine/wolf");
-console.log("----");
-interpretCommand("LIST");
-
-console.log("----");
-interpretCommand("MOVE feline/canine .");
-interpretCommand("LIST");
